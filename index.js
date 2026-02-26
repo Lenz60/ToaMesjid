@@ -334,16 +334,34 @@ function sahurAlert() {
         }
 
         const videoPath = path.join(__dirname, "assets", "videos", "sahur.mp4");
-        const attachment = new AttachmentBuilder(videoPath, {
-          name: "sahur.mp4",
+        const videoPath2 = path.join(
+          __dirname,
+          "assets",
+          "videos",
+          "sahur2.mp4"
+        );
+
+        // Array of video paths
+        const videoPaths = [videoPath, videoPath2];
+
+        // Randomly select one video
+        const selectedVideoPath =
+          videoPaths[Math.floor(Math.random() * videoPaths.length)];
+
+        const attachment = new AttachmentBuilder(selectedVideoPath, {
+          name: path.basename(selectedVideoPath),
         });
 
         await channel.send({
-          content: "Sahur",
+          content: "@everyone Sahur",
           files: [attachment],
         });
 
-        console.log("Sahur alert sent successfully");
+        console.log(
+          `Sahur alert sent successfully with ${path.basename(
+            selectedVideoPath
+          )}`
+        );
       } catch (error) {
         console.error("Error sending sahur alert:", error);
       }
