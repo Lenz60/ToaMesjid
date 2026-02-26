@@ -142,12 +142,12 @@ function calculateCountdownToMaghrib(maghribTime) {
     const hours = Math.floor(diffMinutes / 60);
     const remainingMinutes = diffMinutes % 60;
     if (remainingMinutes > 0) {
-      return `sabar bos ${hours} jam ${remainingMinutes} menit lagi buka (WIB)`;
+      return `sabar bos ${hours} jam ${remainingMinutes} menit lagi buka (Jakarta WIB)`;
     } else {
-      return `sabar bos ${hours} jam lagi buka (WIB)`;
+      return `sabar bos ${hours} jam lagi buka (Jakarta WIB)`;
     }
   } else {
-    return `sabar bos ${diffMinutes} menit lagi buka (WIB)`;
+    return `sabar bos ${diffMinutes} menit lagi buka (Jakarta WIB)`;
   }
 }
 
@@ -192,8 +192,8 @@ function calculateCountdownToImsak(imsakTime) {
     millisecond: 0,
   });
 
-  // If current time is after 19:00 and imsak is early morning, imsak is tomorrow
-  if (now.hour() >= 19 && hours < 12) {
+  // If imsak time has already passed today, it means tomorrow's imsak
+  if (imsakDateTime.isBefore(now) || imsakDateTime.isSame(now)) {
     imsakDateTime.add(1, "day");
   }
 
@@ -212,14 +212,53 @@ function calculateCountdownToImsak(imsakTime) {
   }
 }
 
-function isWithinFastingHours() {
-  const currentHour = moment.tz("Asia/Jakarta").hour();
-  return currentHour >= 5 && currentHour < 17;
+function isWithinFastingHours(imsakiyahData) {
+  const currentTime = moment.tz("Asia/Jakarta");
+
+  // Get any available Maghrib time
+  const maghribTime =
+    imsakiyahData.imsakiyahJakartaNow?.maghrib ||
+    imsakiyahData.imsakiyahBantulNow?.maghrib ||
+    imsakiyahData.imsakiyahSlemanNow?.maghrib ||
+    imsakiyahData.imsakiyahJogjaNow?.maghrib ||
+    imsakiyahData.imsakiyahSamarindaNow?.maghrib ||
+    imsakiyahData.imsakiyahTangerangNow?.maghrib;
+
+  if (!maghribTime) return false;
+
+  const maghrib = moment.tz(maghribTime, "HH:mm", "Asia/Jakarta");
+  const imsak = moment.tz("05:00", "HH:mm", "Asia/Jakarta");
+
+  return currentTime.isBetween(imsak, maghrib);
 }
 
-function isWithinSahurHours() {
-  const currentHour = moment.tz("Asia/Jakarta").hour();
-  return currentHour >= 19 || currentHour < 2;
+function isWithinSahurHours(imsakiyahData) {
+  const currentTime = moment.tz("Asia/Jakarta");
+
+  // Get any available Maghrib time for sahur start
+  const maghribTime =
+    imsakiyahData.imsakiyahJakartaNow?.maghrib ||
+    imsakiyahData.imsakiyahBantulNow?.maghrib ||
+    imsakiyahData.imsakiyahSlemanNow?.maghrib ||
+    imsakiyahData.imsakiyahJogjaNow?.maghrib ||
+    imsakiyahData.imsakiyahSamarindaNow?.maghrib ||
+    imsakiyahData.imsakiyahTangerangNow?.maghrib;
+
+  // Get any available Imsak time for tomorrow
+  const imsakTime =
+    imsakiyahData.imsakiyahJakartaNow?.imsak ||
+    imsakiyahData.imsakiyahBantulNow?.imsak ||
+    imsakiyahData.imsakiyahSlemanNow?.imsak ||
+    imsakiyahData.imsakiyahJogjaNow?.imsak ||
+    imsakiyahData.imsakiyahSamarindaNow?.imsak ||
+    imsakiyahData.imsakiyahTangerangNow?.imsak;
+
+  if (!maghribTime || !imsakTime) return false;
+
+  const maghrib = moment.tz(maghribTime, "HH:mm", "Asia/Jakarta");
+  const imsak = moment.tz(imsakTime, "HH:mm", "Asia/Jakarta");
+
+  return currentTime.isAfter(maghrib) || currentTime.isBefore(imsak);
 }
 
 async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
@@ -241,7 +280,17 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
     return;
   }
 
-  if (isWithinFastingHours()) {
+  // Add debugging
+  // const fastingHours = isWithinFastingHours(imsakiyahData);
+  // const sahurHours = isWithinSahurHours(imsakiyahData);
+  // const currentTime = new Date().toLocaleString("id-ID", {
+  //   timeZone: "Asia/Jakarta",
+  // });
+
+  // console.log(`Current time: ${currentTime}`);
+  // console.log(`isWithinFastingHours: ${fastingHours}`);
+  // console.log(`isWithinSahurHours: ${sahurHours}`);
+  if (isWithinFastingHours(imsakiyahData)) {
     const attachment = new AttachmentBuilder(laparImagePath, {
       name: "lapar.jpg",
     });
@@ -282,7 +331,7 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
         content: "Data maghrib tidak tersedia",
       });
     }
-  } else if (isWithinSahurHours()) {
+  } else if (isWithinSahurHours(imsakiyahData)) {
     const attachment = new AttachmentBuilder(makanImagePath, {
       name: "kerupuk.jpg",
     });
