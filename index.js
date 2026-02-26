@@ -93,8 +93,11 @@ async function initializeImsakiyahData() {
   }
 
   const locations = [
-    { name: "bantul", provinsi: "D.I. Yogyakarta", kabkota: "Kab. Bantul" },
-    { name: "sleman", provinsi: "D.I. Yogyakarta", kabkota: "Kab. Sleman" },
+    {
+      name: "majalengka",
+      provinsi: "Jawa Barat",
+      kabkota: "Kab. Majalengka",
+    },
     { name: "jogja", provinsi: "D.I. Yogyakarta", kabkota: "Kota Yogyakarta" },
     {
       name: "samarinda",
@@ -154,8 +157,9 @@ function calculateCountdownToMaghrib(maghribTime) {
 function formatMaghribTimes(imsakiyahData) {
   const maghribTimes = [
     `Puasa hari ke : ${imsakiyahData.imsakiyahJakartaNow?.tanggal || "N/A"}`,
-    `Bantul : ${imsakiyahData.imsakiyahBantulNow?.maghrib || "N/A"} WIB`,
-    `Sleman : ${imsakiyahData.imsakiyahSlemanNow?.maghrib || "N/A"} WIB`,
+    `Majalengka : ${
+      imsakiyahData.imsakiyahMajalengkaNow?.maghrib || "N/A"
+    } WIB`,
     `Jogja : ${imsakiyahData.imsakiyahJogjaNow?.maghrib || "N/A"} WIB`,
     `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.maghrib || "N/A"} WITA`,
     `Jakarta : ${imsakiyahData.imsakiyahJakartaNow?.maghrib || "N/A"} WIB`,
@@ -168,8 +172,9 @@ function formatMaghribTimes(imsakiyahData) {
 function formatImsakTimes(imsakiyahData) {
   const imsakTimes = [
     `Puasa hari ke : ${imsakiyahData.imsakiyahJakartaNow?.tanggal || "N/A"}`,
-    `Bantul : ${imsakiyahData.imsakiyahBantulNow?.imsak || "N/A"} WIB`,
-    `Sleman : ${imsakiyahData.imsakiyahSlemanNow?.imsak || "N/A"} WIB`,
+    `Majalengka : ${
+      imsakiyahData.imsakiyahMajalengkaNow?.maghrib || "N/A"
+    } WIB`,
     `Jogja : ${imsakiyahData.imsakiyahJogjaNow?.imsak || "N/A"} WIB`,
     `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.imsak || "N/A"} WITA`,
     `Jakarta : ${imsakiyahData.imsakiyahJakartaNow?.imsak || "N/A"} WIB`,
@@ -218,8 +223,7 @@ function isWithinFastingHours(imsakiyahData) {
   // Get any available Maghrib time
   const maghribTime =
     imsakiyahData.imsakiyahJakartaNow?.maghrib ||
-    imsakiyahData.imsakiyahBantulNow?.maghrib ||
-    imsakiyahData.imsakiyahSlemanNow?.maghrib ||
+    imsakiyahData.imsakiyahMajalengkaNow?.maghrib ||
     imsakiyahData.imsakiyahJogjaNow?.maghrib ||
     imsakiyahData.imsakiyahSamarindaNow?.maghrib ||
     imsakiyahData.imsakiyahTangerangNow?.maghrib;
@@ -238,8 +242,7 @@ function isWithinSahurHours(imsakiyahData) {
   // Get any available Maghrib time for sahur start
   const maghribTime =
     imsakiyahData.imsakiyahJakartaNow?.maghrib ||
-    imsakiyahData.imsakiyahBantulNow?.maghrib ||
-    imsakiyahData.imsakiyahSlemanNow?.maghrib ||
+    imsakiyahData.imsakiyahMajalengkaNow?.maghrib ||
     imsakiyahData.imsakiyahJogjaNow?.maghrib ||
     imsakiyahData.imsakiyahSamarindaNow?.maghrib ||
     imsakiyahData.imsakiyahTangerangNow?.maghrib;
@@ -247,8 +250,7 @@ function isWithinSahurHours(imsakiyahData) {
   // Get any available Imsak time for tomorrow
   const imsakTime =
     imsakiyahData.imsakiyahJakartaNow?.imsak ||
-    imsakiyahData.imsakiyahBantulNow?.imsak ||
-    imsakiyahData.imsakiyahSlemanNow?.imsak ||
+    imsakiyahData.imsakiyahMajalengkaNow?.imsak ||
     imsakiyahData.imsakiyahJogjaNow?.imsak ||
     imsakiyahData.imsakiyahSamarindaNow?.imsak ||
     imsakiyahData.imsakiyahTangerangNow?.imsak;
@@ -266,8 +268,7 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
 
   // Check if all API calls failed
   const allDataFailed =
-    !imsakiyahData.imsakiyahBantulNow &&
-    !imsakiyahData.imsakiyahSlemanNow &&
+    !imsakiyahData.imsakiyahMajalengkaNow &&
     !imsakiyahData.imsakiyahJogjaNow &&
     !imsakiyahData.imsakiyahSamarindaNow &&
     !imsakiyahData.imsakiyahJakartaNow &&
@@ -312,24 +313,21 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
 
     // Existing maghrib countdown logic
     const jakartaMaghrib = imsakiyahData.imsakiyahJakartaNow?.maghrib;
-    const bantulMaghrib = imsakiyahData.imsakiyahBantulNow?.maghrib;
-    const slemanMaghrib = imsakiyahData.imsakiyahSlemanNow?.maghrib;
+    const majalengkaMaghrib = imsakiyahData.imsakiyahMajalengkaNow?.maghrib;
     const jogjaMaghrib = imsakiyahData.imsakiyahJogjaNow?.maghrib;
     const samarindaMaghrib = imsakiyahData.imsakiyahSamarindaNow?.maghrib;
     const tangerangMaghrib = imsakiyahData.imsakiyahTangerangNow?.maghrib;
 
     if (
       jakartaMaghrib ||
-      bantulMaghrib ||
-      slemanMaghrib ||
+      majalengkaMaghrib ||
       jogjaMaghrib ||
       samarindaMaghrib ||
       tangerangMaghrib
     ) {
       const referenceMaghrib =
         jakartaMaghrib ||
-        bantulMaghrib ||
-        slemanMaghrib ||
+        majalengkaMaghrib ||
         jogjaMaghrib ||
         samarindaMaghrib ||
         tangerangMaghrib;
@@ -353,24 +351,21 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
     });
     // New imsak countdown logic
     const jakartaImsak = imsakiyahData.imsakiyahJakartaNow?.imsak;
-    const bantulImsak = imsakiyahData.imsakiyahBantulNow?.imsak;
-    const slemanImsak = imsakiyahData.imsakiyahSlemanNow?.imsak;
+    const majalengkaImsak = imsakiyahData.imsakiyahMajalengkaNow?.imsak;
     const jogjaImsak = imsakiyahData.imsakiyahJogjaNow?.imsak;
     const samarindaImsak = imsakiyahData.imsakiyahSamarindaNow?.imsak;
     const tangerangImsak = imsakiyahData.imsakiyahTangerangNow?.imsak;
 
     if (
       jakartaImsak ||
-      bantulImsak ||
-      slemanImsak ||
+      majalengkaImsak ||
       jogjaImsak ||
       samarindaImsak ||
       tangerangImsak
     ) {
       const referenceImsak =
         jakartaImsak ||
-        bantulImsak ||
-        slemanImsak ||
+        majalengkaImsak ||
         jogjaImsak ||
         samarindaImsak ||
         tangerangImsak;
