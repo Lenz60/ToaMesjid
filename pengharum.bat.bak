@@ -1,0 +1,7 @@
+@ECHO OFF
+R:
+cd "R:\pengharum-ruangan"
+dir
+pause
+
+
