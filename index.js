@@ -4,6 +4,7 @@ require("dotenv").config();
 const cron = require("node-cron");
 const path = require("path");
 const axios = require("axios");
+const moment = require("moment-timezone");
 const { error } = require("console");
 
 const client = new Client({
@@ -98,17 +99,19 @@ async function initializeImsakiyahData() {
 }
 
 function calculateCountdownToMaghrib(maghribTime) {
-  // Use Jakarta timezone for calculations
-  const now = new Date();
-  const jakartaTime = new Date(
-    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
-  );
+  // Use moment for Jakarta timezone
+  const now = moment.tz("Asia/Jakarta");
   const [hours, minutes] = maghribTime.split(":").map(Number);
-  const maghribDateTime = new Date(jakartaTime);
-  maghribDateTime.setHours(hours, minutes, 0, 0);
 
-  const diffMs = maghribDateTime.getTime() - jakartaTime.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  // Create maghrib time for today
+  const maghribDateTime = now.clone().set({
+    hour: hours,
+    minute: minutes,
+    second: 0,
+    millisecond: 0,
+  });
+
+  const diffMinutes = maghribDateTime.diff(now, "minutes");
 
   if (diffMinutes > 60) {
     const hours = Math.floor(diffMinutes / 60);
@@ -150,22 +153,24 @@ function formatImsakTimes(imsakiyahData) {
 }
 
 function calculateCountdownToImsak(imsakTime) {
-  // Use Jakarta timezone for calculations
-  const now = new Date();
-  const jakartaTime = new Date(
-    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
-  );
+  // Use moment for Jakarta timezone
+  const now = moment.tz("Asia/Jakarta");
   const [hours, minutes] = imsakTime.split(":").map(Number);
-  const imsakDateTime = new Date(jakartaTime);
-  imsakDateTime.setHours(hours, minutes, 0, 0);
 
-  // If imsak time is tomorrow (current time is after 19:00 and imsak is early morning)
-  if (jakartaTime.getHours() >= 19 && hours < 12) {
-    imsakDateTime.setDate(imsakDateTime.getDate() + 1);
+  // Create imsak time
+  let imsakDateTime = now.clone().set({
+    hour: hours,
+    minute: minutes,
+    second: 0,
+    millisecond: 0,
+  });
+
+  // If current time is after 19:00 and imsak is early morning, imsak is tomorrow
+  if (now.hour() >= 19 && hours < 12) {
+    imsakDateTime.add(1, "day");
   }
 
-  const diffMs = imsakDateTime.getTime() - jakartaTime.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffMinutes = imsakDateTime.diff(now, "minutes");
 
   if (diffMinutes > 60) {
     const hours = Math.floor(diffMinutes / 60);
@@ -181,22 +186,12 @@ function calculateCountdownToImsak(imsakTime) {
 }
 
 function isWithinFastingHours() {
-  const now = new Date();
-  const jakartaTime = new Date(
-    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
-  );
-  const currentHour = jakartaTime.getHours();
+  const currentHour = moment.tz("Asia/Jakarta").hour();
   return currentHour >= 5 && currentHour < 17;
 }
 
 function isWithinSahurHours() {
-  // Get current time in Jakarta timezone (UTC+7)
-  const now = new Date();
-  const jakartaTime = new Date(
-    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
-  );
-  const currentHour = jakartaTime.getHours();
-  // 19:00 (7 PM) to 02:00 (2 AM) - crosses midnight
+  const currentHour = moment.tz("Asia/Jakarta").hour();
   return currentHour >= 19 || currentHour < 2;
 }
 
