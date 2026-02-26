@@ -22,7 +22,7 @@ client.login(process.env.TOKEN);
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 client.on("ready", () => {
-  const channel = client.channels.cache.get(ChannelID.BotChannelID);
+  const channel = client.channels.cache.get(ChannelID.TestChannelID);
   console.log(`${client.user.username} ready!`);
   channel.send("Toa Mesjid Online 🔈🔉🔊");
 });
@@ -153,10 +153,11 @@ function calculateCountdownToMaghrib(maghribTime) {
 
 function formatMaghribTimes(imsakiyahData) {
   const maghribTimes = [
+    `Puasa hari ke : ${imsakiyahData.imsakiyahJakartaNow?.tanggal || "N/A"}`,
     `Bantul : ${imsakiyahData.imsakiyahBantulNow?.maghrib || "N/A"} WIB`,
     `Sleman : ${imsakiyahData.imsakiyahSlemanNow?.maghrib || "N/A"} WIB`,
     `Jogja : ${imsakiyahData.imsakiyahJogjaNow?.maghrib || "N/A"} WIB`,
-    `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.maghrib || "N/A"} WIB`,
+    `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.maghrib || "N/A"} WITA`,
     `Jakarta : ${imsakiyahData.imsakiyahJakartaNow?.maghrib || "N/A"} WIB`,
     `Tangerang : ${imsakiyahData.imsakiyahTangerangNow?.maghrib || "N/A"} WIB`,
   ].join("\n");
@@ -166,6 +167,7 @@ function formatMaghribTimes(imsakiyahData) {
 
 function formatImsakTimes(imsakiyahData) {
   const imsakTimes = [
+    `Puasa hari ke : ${imsakiyahData.imsakiyahJakartaNow?.tanggal || "N/A"}`,
     `Bantul : ${imsakiyahData.imsakiyahBantulNow?.imsak || "N/A"} WIB`,
     `Sleman : ${imsakiyahData.imsakiyahSlemanNow?.imsak || "N/A"} WIB`,
     `Jogja : ${imsakiyahData.imsakiyahJogjaNow?.imsak || "N/A"} WIB`,
@@ -329,7 +331,7 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
 }
 
 client.on("messageCreate", async (message) => {
-  const channel = client.channels.cache.get(ChannelID.GeneralID);
+  const channel = client.channels.cache.get(ChannelID.TestChannelID);
   if (message.author.bot) return;
   const content = message.content;
 
@@ -351,7 +353,7 @@ function sahurAlert() {
     async () => {
       try {
         // const channel = client.channels.cache.get(ChannelID.BotChannelID);
-        const channel = client.channels.cache.get(ChannelID.GeneralID);
+        const channel = client.channels.cache.get(ChannelID.TestChannelID);
 
         if (!channel) {
           console.error("Channel not found");
@@ -410,37 +412,37 @@ const timeoutclose = setTimeout(function () {
 //   return new Promise((resolve) => setTimeout(resolve, time));
 // }
 // process.on("SIGHUP", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGINT", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 //   sleep(3000).then(() => {
 //     process.exit(0);
 //   });
 // });
 // process.on("SIGTERM", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGKILL", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR1", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR2", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("exit", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("uncaughtException", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
