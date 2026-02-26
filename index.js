@@ -98,12 +98,16 @@ async function initializeImsakiyahData() {
 }
 
 function calculateCountdownToMaghrib(maghribTime) {
+  // Use Jakarta timezone for calculations
   const now = new Date();
+  const jakartaTime = new Date(
+    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
+  );
   const [hours, minutes] = maghribTime.split(":").map(Number);
-  const maghribDateTime = new Date(now);
+  const maghribDateTime = new Date(jakartaTime);
   maghribDateTime.setHours(hours, minutes, 0, 0);
 
-  const diffMs = maghribDateTime.getTime() - now.getTime();
+  const diffMs = maghribDateTime.getTime() - jakartaTime.getTime();
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
   if (diffMinutes > 60) {
@@ -146,17 +150,21 @@ function formatImsakTimes(imsakiyahData) {
 }
 
 function calculateCountdownToImsak(imsakTime) {
+  // Use Jakarta timezone for calculations
   const now = new Date();
+  const jakartaTime = new Date(
+    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
+  );
   const [hours, minutes] = imsakTime.split(":").map(Number);
-  const imsakDateTime = new Date(now);
+  const imsakDateTime = new Date(jakartaTime);
   imsakDateTime.setHours(hours, minutes, 0, 0);
 
   // If imsak time is tomorrow (current time is after 19:00 and imsak is early morning)
-  if (now.getHours() >= 19 && hours < 12) {
+  if (jakartaTime.getHours() >= 19 && hours < 12) {
     imsakDateTime.setDate(imsakDateTime.getDate() + 1);
   }
 
-  const diffMs = imsakDateTime.getTime() - now.getTime();
+  const diffMs = imsakDateTime.getTime() - jakartaTime.getTime();
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
   if (diffMinutes > 60) {
@@ -174,13 +182,20 @@ function calculateCountdownToImsak(imsakTime) {
 
 function isWithinFastingHours() {
   const now = new Date();
-  const currentHour = now.getHours();
+  const jakartaTime = new Date(
+    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
+  );
+  const currentHour = jakartaTime.getHours();
   return currentHour >= 5 && currentHour < 17;
 }
 
 function isWithinSahurHours() {
+  // Get current time in Jakarta timezone (UTC+7)
   const now = new Date();
-  const currentHour = now.getHours();
+  const jakartaTime = new Date(
+    now.toLocaleString("en-US", { timezone: "Asia/Jakarta" })
+  );
+  const currentHour = jakartaTime.getHours();
   // 19:00 (7 PM) to 02:00 (2 AM) - crosses midnight
   return currentHour >= 19 || currentHour < 2;
 }
