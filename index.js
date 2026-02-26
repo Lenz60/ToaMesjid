@@ -171,7 +171,7 @@ function formatImsakTimes(imsakiyahData) {
     `Bantul : ${imsakiyahData.imsakiyahBantulNow?.imsak || "N/A"} WIB`,
     `Sleman : ${imsakiyahData.imsakiyahSlemanNow?.imsak || "N/A"} WIB`,
     `Jogja : ${imsakiyahData.imsakiyahJogjaNow?.imsak || "N/A"} WIB`,
-    `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.imsak || "N/A"} WIT`,
+    `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.imsak || "N/A"} WITA`,
     `Jakarta : ${imsakiyahData.imsakiyahJakartaNow?.imsak || "N/A"} WIB`,
     `Tangerang : ${imsakiyahData.imsakiyahTangerangNow?.imsak || "N/A"} WIB`,
   ].join("\n");
