@@ -288,8 +288,7 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
     }
   } else {
     await channel.send({
-      content: "Sahur",
-      files: [attachment],
+      content: "Mesjid sepi",
     });
   }
 }
