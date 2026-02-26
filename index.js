@@ -22,7 +22,7 @@ client.login(process.env.TOKEN);
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 client.on("ready", () => {
-  const channel = client.channels.cache.get(ChannelID.TestChannelID);
+  const channel = client.channels.cache.get(ChannelID.BotChannelID);
   console.log(`${client.user.username} ready!`);
   channel.send("Toa Mesjid Online 🔈🔉🔊");
 });
@@ -331,7 +331,7 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
 }
 
 client.on("messageCreate", async (message) => {
-  const channel = client.channels.cache.get(ChannelID.TestChannelID);
+  const channel = client.channels.cache.get(ChannelID.GeneralID);
   if (message.author.bot) return;
   const content = message.content;
 
@@ -353,7 +353,7 @@ function sahurAlert() {
     async () => {
       try {
         // const channel = client.channels.cache.get(ChannelID.BotChannelID);
-        const channel = client.channels.cache.get(ChannelID.TestChannelID);
+        const channel = client.channels.cache.get(ChannelID.GeneralID);
 
         if (!channel) {
           console.error("Channel not found");
@@ -412,37 +412,37 @@ const timeoutclose = setTimeout(function () {
 //   return new Promise((resolve) => setTimeout(resolve, time));
 // }
 // process.on("SIGHUP", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGINT", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 //   sleep(3000).then(() => {
 //     process.exit(0);
 //   });
 // });
 // process.on("SIGTERM", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGKILL", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR1", async function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR2", async function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("exit", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
 // process.on("uncaughtException", async function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
 //   channel.send("Pengharum Ruangan Offline");
 // });
