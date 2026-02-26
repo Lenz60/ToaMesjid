@@ -291,9 +291,25 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
   // console.log(`isWithinFastingHours: ${fastingHours}`);
   // console.log(`isWithinSahurHours: ${sahurHours}`);
   if (isWithinFastingHours(imsakiyahData)) {
-    const attachment = new AttachmentBuilder(laparImagePath, {
+    const lapar = new AttachmentBuilder(laparImagePath, {
       name: "lapar.jpg",
     });
+    const puasaJamBerapaYah = path.join(
+      __dirname,
+      "assets",
+      "videos",
+      "bukapuasajamberapayah.mp4"
+    );
+    const esBuah = path.join(__dirname, "assets", "videos", "esbuah.mp4");
+    const esTeh = path.join(__dirname, "assets", "videos", "estehcalling.mp4");
+
+    // Array of video paths
+    const videoPaths = [lapar, puasaJamBerapaYah, esBuah, esTeh];
+
+    // Randomly select one video
+    const randomizeMeme =
+      videoPaths[Math.floor(Math.random() * videoPaths.length)];
+
     // Existing maghrib countdown logic
     const jakartaMaghrib = imsakiyahData.imsakiyahJakartaNow?.maghrib;
     const bantulMaghrib = imsakiyahData.imsakiyahBantulNow?.maghrib;
@@ -324,7 +340,7 @@ async function handleLaparMessage(channel, laparImagePath, makanImagePath) {
 
       await channel.send({
         content: messageContent,
-        files: [attachment],
+        files: [randomizeMeme],
       });
     } else {
       await channel.send({
