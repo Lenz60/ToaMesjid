@@ -45,12 +45,12 @@ function getCurrentDate() {
   return new Date().getDate();
 }
 
-function extractImsakiyahData(apiResponse, currentDate) {
+function extractImsakiyahData(apiResponse, currentRamadanDay) {
   if (!apiResponse || !apiResponse.data) return null;
 
   const { kabkota, imsakiyah } = apiResponse.data;
   const todaySchedule = imsakiyah.find(
-    (schedule) => schedule.tanggal === currentDate
+    (schedule) => schedule.tanggal === currentRamadanDay
   );
 
   if (!todaySchedule) return null;
@@ -63,9 +63,34 @@ function extractImsakiyahData(apiResponse, currentDate) {
     maghrib: todaySchedule.maghrib,
   };
 }
+function getCurrentRamadanDay() {
+  // Ramadan 2025 starts on February 19, 2026 (1st day of Ramadan)
+  const ramadanStartDate = moment.tz("2026-02-19", "Asia/Jakarta");
+  const today = moment.tz("Asia/Jakarta");
+
+  // Calculate days since Ramadan started
+  const daysDifference = today.diff(ramadanStartDate, "days");
+
+  // Ramadan day is 1-based, so add 1
+  const ramadanDay = daysDifference + 1;
+
+  // Ensure it's within valid Ramadan range (1-30)
+  if (ramadanDay < 1 || ramadanDay > 30) {
+    console.log(`Not in Ramadan period. Calculated day: ${ramadanDay}`);
+    return null;
+  }
+
+  return ramadanDay;
+}
 
 async function initializeImsakiyahData() {
-  const currentDate = getCurrentDate();
+  const currentRamadanDay = getCurrentRamadanDay();
+
+  // If not in Ramadan period, return empty data
+  if (!currentRamadanDay) {
+    console.log("Not currently in Ramadan period");
+    return {};
+  }
 
   const locations = [
     { name: "bantul", provinsi: "D.I. Yogyakarta", kabkota: "Kab. Bantul" },
@@ -87,7 +112,7 @@ async function initializeImsakiyahData() {
       location.provinsi,
       location.kabkota
     );
-    const extractedData = extractImsakiyahData(apiResponse, currentDate);
+    const extractedData = extractImsakiyahData(apiResponse, currentRamadanDay);
     imsakiyahData[
       `imsakiyah${
         location.name.charAt(0).toUpperCase() + location.name.slice(1)
