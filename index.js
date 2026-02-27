@@ -22,7 +22,7 @@ client.login(process.env.TOKEN);
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 client.on("ready", () => {
-  const channel = client.channels.cache.get(ChannelID.BotChannelID);
+  const channel = client.channels.cache.get(ChannelID.TestChannelID);
   console.log(`${client.user.username} ready!`);
   channel.send("Toa Mesjid Online 🔈🔉🔊");
 });
@@ -172,9 +172,7 @@ function formatMaghribTimes(imsakiyahData) {
 function formatImsakTimes(imsakiyahData) {
   const imsakTimes = [
     `Puasa hari ke : ${imsakiyahData.imsakiyahJakartaNow?.tanggal || "N/A"}`,
-    `Majalengka : ${
-      imsakiyahData.imsakiyahMajalengkaNow?.maghrib || "N/A"
-    } WIB`,
+    `Majalengka : ${imsakiyahData.imsakiyahMajalengkaNow?.imsak || "N/A"} WIB`,
     `Jogja : ${imsakiyahData.imsakiyahJogjaNow?.imsak || "N/A"} WIB`,
     `Samarinda : ${imsakiyahData.imsakiyahSamarindaNow?.imsak || "N/A"} WITA`,
     `Jakarta : ${imsakiyahData.imsakiyahJakartaNow?.imsak || "N/A"} WIB`,
@@ -440,7 +438,7 @@ function sahurAlert() {
         });
 
         await channel.send({
-          content: "@everyone Sahur",
+          content: "Sahur",
           files: [attachment],
         });
 
