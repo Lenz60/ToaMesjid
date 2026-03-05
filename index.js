@@ -450,7 +450,7 @@ function sahurAlert() {
           name: path.basename(selectedVideoPath),
         });
 
-        await message.reply({
+        await channel.send({
           content: "Sahur",
           files: [attachment],
         });
