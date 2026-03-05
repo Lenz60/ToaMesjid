@@ -23,7 +23,7 @@ client.login(process.env.TOKEN);
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 client.on("ready", () => {
-  const channel = client.channels.cache.get(ChannelID.TestChannelID);
+  const channel = client.channels.cache.get(ChannelID.BotChannelID);
   console.log(`${client.user.username} ready!`);
   channel.send("Toa Mesjid Online 🔈🔉🔊");
 });
@@ -270,7 +270,7 @@ function isWithinSahurHours(imsakiyahData) {
   return currentTime.isAfter(maghrib) || currentTime.isBefore(imsak);
 }
 
-async function handleLaparMessage(channel) {
+async function handleLaparMessage(channel, message) {
   const imsakiyahData = await initializeImsakiyahData();
 
   // Check if all API calls failed
@@ -282,7 +282,7 @@ async function handleLaparMessage(channel) {
     !imsakiyahData.imsakiyahTangerangNow;
 
   if (allDataFailed) {
-    await channel.send({
+    await message.reply({
       content: "Marbot mesjid kabur, printer rusak",
     });
     return;
@@ -344,18 +344,18 @@ async function handleLaparMessage(channel) {
         const videoPaths = [assets.videos.cokA, assets.videos.hariIniAkuMokel];
         const randomizeMeme =
           videoPaths[Math.floor(Math.random() * videoPaths.length)];
-        await channel.send({
+        await message.reply({
           content: messageContent,
           files: [randomizeMeme],
         });
-      } else {
-        await channel.send({
-          content: messageContent,
-          files: [randomizeMeme],
-        });
+        return;
       }
+      await message.reply({
+        content: messageContent,
+        files: [randomizeMeme],
+      });
     } else {
-      await channel.send({
+      await message.reply({
         content: "Data maghrib tidak tersedia",
       });
     }
@@ -397,30 +397,30 @@ async function handleLaparMessage(channel) {
       const imsakTimes = formatImsakTimes(imsakiyahData);
       const messageContent = `${countdownText}\n\n${imsakTimes}`;
 
-      await channel.send({
+      await message.reply({
         content: messageContent,
         files: [randomizeMeme],
       });
     } else {
-      await channel.send({
+      await message.reply({
         content: "Data imsak tidak tersedia",
       });
     }
   } else {
-    await channel.send({
+    await message.reply({
       content: "Mesjid sepi",
     });
   }
 }
 
 client.on("messageCreate", async (message) => {
-  const channel = client.channels.cache.get(ChannelID.TestChannelID);
+  const channel = client.channels.cache.get(ChannelID.GeneralID);
   if (message.author.bot) return;
   const content = message.content;
 
   const lapar = /(^| |\"|\')lapar nich( |$|\.|\,|!|\?|\:|\;|\"|\')/i;
   if (lapar.test(content) || content.includes("796773828059201616")) {
-    await handleLaparMessage(channel);
+    await handleLaparMessage(channel, message);
     return;
   }
 });
@@ -432,7 +432,7 @@ function sahurAlert() {
     async () => {
       try {
         // const channel = client.channels.cache.get(ChannelID.BotChannelID);
-        const channel = client.channels.cache.get(ChannelID.TestChannelID);
+        const channel = client.channels.cache.get(ChannelID.GeneralID);
 
         if (!channel) {
           console.error("Channel not found");
@@ -450,7 +450,7 @@ function sahurAlert() {
           name: path.basename(selectedVideoPath),
         });
 
-        await channel.send({
+        await message.reply({
           content: "Sahur",
           files: [attachment],
         });
@@ -483,37 +483,37 @@ const timeoutclose = setTimeout(function () {
 //   return new Promise((resolve) => setTimeout(resolve, time));
 // }
 // process.on("SIGHUP", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGINT", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 //   sleep(3000).then(() => {
 //     process.exit(0);
 //   });
 // });
 // process.on("SIGTERM", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGKILL", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR1", async function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR2", async function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("exit", function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("uncaughtException", async function () {
-//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
-//   channel.send("Pengharum Ruangan Offline");
+//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   message.reply("Pengharum Ruangan Offline");
 // });
