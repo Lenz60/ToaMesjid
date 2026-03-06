@@ -308,6 +308,12 @@ async function handleLaparMessage(channel, message) {
       assets.videos.esTeh,
       assets.videos.bahlil,
       assets.videos.ashadu,
+      assets.videos.sederhana,
+      assets.videos.mancing1,
+      assets.videos.mancing2,
+      assets.videos.mancing3,
+      assets.videos.maju,
+      assets.videos.cobaDulu,
     ];
 
     // Randomly select one video
@@ -367,6 +373,13 @@ async function handleLaparMessage(channel, message) {
       assets.videos.bukaGes,
       assets.videos.waktunyaBuka,
       assets.videos.wahyuDibadog,
+      assets.videos.kueNiga,
+      assets.videos.bis,
+      assets.videos.petasan,
+      assets.videos.mancing1,
+      assets.videos.mancing2,
+      assets.videos.mancing3,
+      assets.videos.cobaDulu,
     ];
 
     // Randomly select one video
