@@ -7,6 +7,7 @@ const axios = require("axios");
 const moment = require("moment-timezone");
 const { error } = require("console");
 const assets = require("./PathAssets");
+const fs = require("fs");
 
 const client = new Client({
   disableMentions: "everyone",
@@ -18,12 +19,25 @@ const client = new Client({
   ],
 });
 
+// Add error logging function
+function logError(error, context) {
+  const timestamp = new Date().toISOString();
+  const logEntry = `[${timestamp}] ${context}: ${error.message}\n${error.stack}\n\n`;
+  const logPath = path.join(__dirname, "errorLog.txt");
+
+  try {
+    fs.appendFileSync(logPath, logEntry);
+  } catch (logError) {
+    console.error("Failed to write to error log:", logError);
+  }
+}
+
 client.login(process.env.TOKEN);
 
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 client.on("ready", () => {
-  const channel = client.channels.cache.get(ChannelID.BotChannelID);
+  const channel = client.channels.cache.get(ChannelID.TestChannelID);
   console.log(`${client.user.username} ready!`);
   channel.send("Toa Mesjid Online 🔈🔉🔊");
 });
@@ -37,6 +51,7 @@ async function fetchImsakiyah(provinsi, kabkota) {
     });
     return response.data;
   } catch (error) {
+    logError(error, `fetchImsakiyah - ${kabkota}`);
     console.error(`Error fetching imsakiyah for ${kabkota}:`, error);
     return null;
   }
@@ -271,163 +286,179 @@ function isWithinSahurHours(imsakiyahData) {
 }
 
 async function handleLaparMessage(channel, message) {
-  const imsakiyahData = await initializeImsakiyahData();
+  try {
+    const imsakiyahData = await initializeImsakiyahData();
 
-  // Check if all API calls failed
-  const allDataFailed =
-    !imsakiyahData.imsakiyahMajalengkaNow &&
-    !imsakiyahData.imsakiyahJogjaNow &&
-    !imsakiyahData.imsakiyahSamarindaNow &&
-    !imsakiyahData.imsakiyahJakartaNow &&
-    !imsakiyahData.imsakiyahTangerangNow;
+    // Check if all API calls failed
+    const allDataFailed =
+      !imsakiyahData.imsakiyahMajalengkaNow &&
+      !imsakiyahData.imsakiyahJogjaNow &&
+      !imsakiyahData.imsakiyahSamarindaNow &&
+      !imsakiyahData.imsakiyahJakartaNow &&
+      !imsakiyahData.imsakiyahTangerangNow;
 
-  if (allDataFailed) {
-    await message.reply({
-      content: "Marbot mesjid kabur, printer rusak",
-    });
-    return;
-  }
+    if (allDataFailed) {
+      await message.reply({
+        content: "Marbot mesjid kabur, printer rusak",
+      });
+      return;
+    }
 
-  // Add debugging
-  // const fastingHours = isWithinFastingHours(imsakiyahData);
-  // const sahurHours = isWithinSahurHours(imsakiyahData);
-  // const currentTime = new Date().toLocaleString("id-ID", {
-  //   timeZone: "Asia/Jakarta",
-  // });
+    // Add debugging
+    // const fastingHours = isWithinFastingHours(imsakiyahData);
+    // const sahurHours = isWithinSahurHours(imsakiyahData);
+    // const currentTime = new Date().toLocaleString("id-ID", {
+    //   timeZone: "Asia/Jakarta",
+    // });
 
-  // console.log(`Current time: ${currentTime}`);
-  // console.log(`isWithinFastingHours: ${fastingHours}`);
-  // console.log(`isWithinSahurHours: ${sahurHours}`);
-  if (isWithinFastingHours(imsakiyahData)) {
-    // Array of video paths
-    const videoPaths = [
-      assets.images.lapar,
-      assets.images.puasaGaSih,
-      assets.videos.bukaJamBerapa,
-      assets.videos.esBuah,
-      assets.videos.esTeh,
-      assets.videos.bahlil,
-      assets.videos.ashadu,
-      assets.videos.sederhana,
-      assets.videos.mancing1,
-      assets.videos.mancing2,
-      assets.videos.mancing3,
-      assets.videos.maju,
-      assets.videos.cobaDulu,
-    ];
+    // console.log(`Current time: ${currentTime}`);
+    // console.log(`isWithinFastingHours: ${fastingHours}`);
+    // console.log(`isWithinSahurHours: ${sahurHours}`);
+    if (isWithinFastingHours(imsakiyahData)) {
+      // Array of video paths
+      const videoPaths = [
+        assets.images.lapar,
+        assets.images.puasaGaSih,
+        assets.videos.bukaJamBerapa,
+        assets.videos.esBuah,
+        assets.videos.esTeh,
+        assets.videos.bahlil,
+        assets.videos.ashadu,
+        assets.videos.sederhana,
+        assets.videos.mancing1,
+        assets.videos.mancing2,
+        assets.videos.mancing3,
+        assets.videos.maju,
+        assets.videos.cobaDulu,
+      ];
 
-    // Randomly select one video
-    const randomizeMeme =
-      videoPaths[Math.floor(Math.random() * videoPaths.length)];
+      // Randomly select one video
+      const randomizeMeme =
+        videoPaths[Math.floor(Math.random() * videoPaths.length)];
 
-    // Existing maghrib countdown logic
-    const jakartaMaghrib = imsakiyahData.imsakiyahJakartaNow?.maghrib;
-    const majalengkaMaghrib = imsakiyahData.imsakiyahMajalengkaNow?.maghrib;
-    const jogjaMaghrib = imsakiyahData.imsakiyahJogjaNow?.maghrib;
-    const samarindaMaghrib = imsakiyahData.imsakiyahSamarindaNow?.maghrib;
-    const tangerangMaghrib = imsakiyahData.imsakiyahTangerangNow?.maghrib;
+      // Existing maghrib countdown logic
+      const jakartaMaghrib = imsakiyahData.imsakiyahJakartaNow?.maghrib;
+      const majalengkaMaghrib = imsakiyahData.imsakiyahMajalengkaNow?.maghrib;
+      const jogjaMaghrib = imsakiyahData.imsakiyahJogjaNow?.maghrib;
+      const samarindaMaghrib = imsakiyahData.imsakiyahSamarindaNow?.maghrib;
+      const tangerangMaghrib = imsakiyahData.imsakiyahTangerangNow?.maghrib;
 
-    if (
-      jakartaMaghrib ||
-      majalengkaMaghrib ||
-      jogjaMaghrib ||
-      samarindaMaghrib ||
-      tangerangMaghrib
-    ) {
-      const referenceMaghrib =
+      if (
         jakartaMaghrib ||
         majalengkaMaghrib ||
         jogjaMaghrib ||
         samarindaMaghrib ||
-        tangerangMaghrib;
+        tangerangMaghrib
+      ) {
+        const referenceMaghrib =
+          jakartaMaghrib ||
+          majalengkaMaghrib ||
+          jogjaMaghrib ||
+          samarindaMaghrib ||
+          tangerangMaghrib;
 
-      const countdownText = calculateCountdownToMaghrib(referenceMaghrib);
-      const maghribTimes = formatMaghribTimes(imsakiyahData);
-      const messageContent = `${countdownText}\n\n${maghribTimes}`;
+        const countdownText = calculateCountdownToMaghrib(referenceMaghrib);
+        const maghribTimes = formatMaghribTimes(imsakiyahData);
+        const messageContent = `${countdownText}\n\n${maghribTimes}`;
 
-      // Check if its lunch time
-      if (isLunchTime()) {
-        const videoPaths = [assets.videos.cokA, assets.videos.hariIniAkuMokel];
-        const randomizeMeme =
-          videoPaths[Math.floor(Math.random() * videoPaths.length)];
+        // Check if its lunch time
+        if (isLunchTime()) {
+          const videoPaths = [
+            assets.videos.cokA,
+            assets.videos.hariIniAkuMokel,
+          ];
+          const randomizeMeme =
+            videoPaths[Math.floor(Math.random() * videoPaths.length)];
+          await message.reply({
+            content: messageContent,
+            files: [randomizeMeme],
+          });
+          return;
+        }
         await message.reply({
           content: messageContent,
           files: [randomizeMeme],
         });
-        return;
+      } else {
+        await message.reply({
+          content: "Data maghrib tidak tersedia",
+        });
       }
-      await message.reply({
-        content: messageContent,
-        files: [randomizeMeme],
-      });
-    } else {
-      await message.reply({
-        content: "Data maghrib tidak tersedia",
-      });
-    }
-  } else if (isWithinSahurHours(imsakiyahData)) {
-    const videoPaths = [
-      assets.images.kerupuk,
-      assets.gifs.oguriMakan,
-      assets.images.himariMokel,
-      assets.videos.bukaGes,
-      assets.videos.waktunyaBuka,
-      assets.videos.wahyuDibadog,
-      assets.videos.kueNiga,
-      assets.videos.bis,
-      assets.videos.petasan,
-      assets.videos.mancing1,
-      assets.videos.mancing2,
-      assets.videos.mancing3,
-      assets.videos.cobaDulu,
-    ];
+    } else if (isWithinSahurHours(imsakiyahData)) {
+      const videoPaths = [
+        assets.images.kerupuk,
+        assets.gifs.oguriMakan,
+        assets.images.himariMokel,
+        assets.videos.bukaGes,
+        assets.videos.waktunyaBuka,
+        assets.videos.wahyuDibadog,
+        assets.videos.kueNiga,
+        assets.videos.bis,
+        assets.videos.petasan,
+        assets.videos.mancing1,
+        assets.videos.mancing2,
+        assets.videos.mancing3,
+        assets.videos.cobaDulu,
+      ];
 
-    // Randomly select one video
-    const randomizeMeme =
-      videoPaths[Math.floor(Math.random() * videoPaths.length)];
-    // New imsak countdown logic
-    const jakartaImsak = imsakiyahData.imsakiyahJakartaNow?.imsak;
-    const majalengkaImsak = imsakiyahData.imsakiyahMajalengkaNow?.imsak;
-    const jogjaImsak = imsakiyahData.imsakiyahJogjaNow?.imsak;
-    const samarindaImsak = imsakiyahData.imsakiyahSamarindaNow?.imsak;
-    const tangerangImsak = imsakiyahData.imsakiyahTangerangNow?.imsak;
+      // Randomly select one video
+      const randomizeMeme =
+        videoPaths[Math.floor(Math.random() * videoPaths.length)];
+      // New imsak countdown logic
+      const jakartaImsak = imsakiyahData.imsakiyahJakartaNow?.imsak;
+      const majalengkaImsak = imsakiyahData.imsakiyahMajalengkaNow?.imsak;
+      const jogjaImsak = imsakiyahData.imsakiyahJogjaNow?.imsak;
+      const samarindaImsak = imsakiyahData.imsakiyahSamarindaNow?.imsak;
+      const tangerangImsak = imsakiyahData.imsakiyahTangerangNow?.imsak;
 
-    if (
-      jakartaImsak ||
-      majalengkaImsak ||
-      jogjaImsak ||
-      samarindaImsak ||
-      tangerangImsak
-    ) {
-      const referenceImsak =
+      if (
         jakartaImsak ||
         majalengkaImsak ||
         jogjaImsak ||
         samarindaImsak ||
-        tangerangImsak;
+        tangerangImsak
+      ) {
+        const referenceImsak =
+          jakartaImsak ||
+          majalengkaImsak ||
+          jogjaImsak ||
+          samarindaImsak ||
+          tangerangImsak;
 
-      const countdownText = calculateCountdownToImsak(referenceImsak);
-      const imsakTimes = formatImsakTimes(imsakiyahData);
-      const messageContent = `${countdownText}\n\n${imsakTimes}`;
+        const countdownText = calculateCountdownToImsak(referenceImsak);
+        const imsakTimes = formatImsakTimes(imsakiyahData);
+        const messageContent = `${countdownText}\n\n${imsakTimes}`;
 
-      await message.reply({
-        content: messageContent,
-        files: [randomizeMeme],
-      });
+        await message.reply({
+          content: messageContent,
+          files: [randomizeMeme],
+        });
+      } else {
+        await message.reply({
+          content: "Data imsak tidak tersedia",
+        });
+      }
     } else {
       await message.reply({
-        content: "Data imsak tidak tersedia",
+        content: "Mesjid sepi",
       });
     }
-  } else {
-    await message.reply({
-      content: "Mesjid sepi",
-    });
+  } catch (error) {
+    logError(error, "handleLaparMessage");
+    console.error("Error in handleLaparMessage:", error);
+
+    try {
+      await message.reply({
+        content: "Terjadi error, coba lagi nanti",
+      });
+    } catch (replyError) {
+      logError(replyError, "handleLaparMessage - reply error");
+    }
   }
 }
 
 client.on("messageCreate", async (message) => {
-  const channel = client.channels.cache.get(ChannelID.GeneralID);
+  const channel = client.channels.cache.get(ChannelID.TestChannelID);
   if (message.author.bot) return;
   const content = message.content;
 
@@ -445,7 +476,7 @@ function sahurAlert() {
     async () => {
       try {
         // const channel = client.channels.cache.get(ChannelID.BotChannelID);
-        const channel = client.channels.cache.get(ChannelID.GeneralID);
+        const channel = client.channels.cache.get(ChannelID.TestChannelID);
 
         if (!channel) {
           console.error("Channel not found");
@@ -496,37 +527,37 @@ const timeoutclose = setTimeout(function () {
 //   return new Promise((resolve) => setTimeout(resolve, time));
 // }
 // process.on("SIGHUP", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGINT", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 //   sleep(3000).then(() => {
 //     process.exit(0);
 //   });
 // });
 // process.on("SIGTERM", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGKILL", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR1", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR2", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("exit", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("uncaughtException", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
