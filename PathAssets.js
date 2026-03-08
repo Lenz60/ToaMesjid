@@ -59,6 +59,7 @@ const assets = {
   images,
   videos,
   gifs,
+  getAssetCounts,
 };
 
 module.exports = assets;
