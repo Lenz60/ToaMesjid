@@ -471,6 +471,22 @@ client.on("messageCreate", async (message) => {
   }
 });
 
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  const content = message.content;
+  const checkAssets =
+    /(^| |\"|\')ingfo stok takjil( |$|\.|\,|!|\?|\:|\;|\"|\')/i;
+  if (checkAssets.test(content) || content.includes("796773828059201616")) {
+    await message.reply({
+      content: `Ingfo meme mesjid :\nTotal gambar : ${
+        assets.getAssetCounts().imagesCount
+      } ekor\nTotal video : ${
+        assets.getAssetCounts().videosCount
+      } ekor\nTotal gif : ${assets.getAssetCounts().gifsCount} ekor`,
+    });
+  }
+});
+
 function sahurAlert() {
   // Schedule for 3:00 AM Jakarta time (UTC+7) every day
   cron.schedule(

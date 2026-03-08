@@ -47,6 +47,14 @@ const gifs = {
   oguriMakan: path.join(__dirname, "assets", "gifs", "ogurimakan.gif"),
 };
 
+const getAssetCounts = () => {
+  return {
+    imagesCount: Object.keys(images).length,
+    videosCount: Object.keys(videos).length,
+    gifsCount: Object.keys(gifs).length,
+  };
+};
+
 const assets = {
   images,
   videos,
