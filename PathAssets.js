@@ -20,6 +20,7 @@ const videos = {
   mancing3: path.join(__dirname, "assets", "videos", "mancing3.mp4"),
   maju: path.join(__dirname, "assets", "videos", "maju.mp4"),
   bis: path.join(__dirname, "assets", "videos", "bis.mp4"),
+  ojok: path.join(__dirname, "assets", "videos", "ojok.mp4"),
   petasan: path.join(__dirname, "assets", "videos", "petasan.mp4"),
   sederhana: path.join(__dirname, "assets", "videos", "sederhana.mp4"),
   dikejarAyam: path.join(__dirname, "assets", "videos", "dikejarayam.mp4"),

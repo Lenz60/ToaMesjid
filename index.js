@@ -285,7 +285,7 @@ function isWithinSahurHours(imsakiyahData) {
   return currentTime.isAfter(maghrib) || currentTime.isBefore(imsak);
 }
 
-async function handleLaparMessage(channel, message) {
+async function handleLaparMessage(message) {
   try {
     const imsakiyahData = await initializeImsakiyahData();
 
@@ -330,6 +330,7 @@ async function handleLaparMessage(channel, message) {
         assets.videos.mancing3,
         assets.videos.maju,
         assets.videos.cobaDulu,
+        assets.videos.ojok,
       ];
 
       // Randomly select one video
@@ -399,6 +400,7 @@ async function handleLaparMessage(channel, message) {
         assets.videos.mancing2,
         assets.videos.mancing3,
         assets.videos.cobaDulu,
+        assets.videos.ojok,
       ];
 
       // Randomly select one video
@@ -458,14 +460,14 @@ async function handleLaparMessage(channel, message) {
 }
 
 client.on("messageCreate", async (message) => {
-  const channel = client.channels.cache.get(ChannelID.GeneralID);
+  // const channel = client.channels.cache.get(ChannelID.GeneralID);
   if (message.author.bot) return;
   const content = message.content;
 
   const lapar = /(^| |\"|\')lapar nich( |$|\.|\,|!|\?|\:|\;|\"|\')/i;
   if (lapar.test(content) || content.includes("796773828059201616")) {
-    await handleLaparMessage(channel, message);
-    return;
+    await handleLaparMessage(message);
+    // return;
   }
 });
 
