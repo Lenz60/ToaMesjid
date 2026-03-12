@@ -41,6 +41,7 @@ const videos = {
   bukaGes: path.join(__dirname, "assets", "videos", "bukages.mp4"),
   sahur1: path.join(__dirname, "assets", "videos", "sahur.mp4"),
   sahur2: path.join(__dirname, "assets", "videos", "sahur2.mp4"),
+  ayam: path.join(__dirname, "assets", "videos", "ayam.mp4"),
 };
 
 const gifs = {
