@@ -19,6 +19,11 @@ const client = new Client({
   ],
 });
 
+// Variables to store used video
+let usedFastingVideos = [];
+let usedImsakVideos = [];
+let lastResetDate = null;
+
 // Add error logging function
 function logError(error, context) {
   const timestamp = new Date().toISOString();
@@ -285,6 +290,99 @@ function isWithinSahurHours(imsakiyahData) {
   return currentTime.isAfter(maghrib) || currentTime.isBefore(imsak);
 }
 
+function resetDailyVideosIfNeeded() {
+  const today = moment.tz("Asia/Jakarta").format("YYYY-MM-DD");
+
+  if (lastResetDate !== today) {
+    usedFastingVideos = [];
+    usedImsakVideos = [];
+    lastResetDate = today;
+    console.log(`Daily videos reset for ${today}`);
+  }
+}
+
+// Function to get a random unused video based on fasting or imsak category
+function getRandomUnusedVideo(isFasting = false) {
+  // resetDailyVideosIfNeeded();
+
+  const fastingVideos = [
+    assets.images.lapar,
+    assets.images.puasaGaSih,
+    assets.videos.bukaJamBerapa,
+    assets.videos.esBuah,
+    assets.videos.esTeh,
+    assets.videos.bahlil,
+    assets.videos.ashadu,
+    assets.videos.sederhana,
+    assets.videos.ayam,
+    assets.videos.mancing1,
+    assets.videos.mancing2,
+    assets.videos.mancing3,
+    assets.videos.maju,
+    assets.videos.cobaDulu,
+    assets.videos.ojok,
+  ];
+
+  const imsakVideos = [
+    assets.images.kerupuk,
+    assets.gifs.oguriMakan,
+    assets.images.himariMokel,
+    assets.videos.bukaGes,
+    assets.videos.waktunyaBuka,
+    assets.videos.wahyuDibadog,
+    assets.videos.kueNiga,
+    assets.videos.bis,
+    assets.videos.petasan,
+    assets.videos.ayam,
+    assets.videos.mancing1,
+    assets.videos.mancing2,
+    assets.videos.mancing3,
+    assets.videos.cobaDulu,
+    assets.videos.ojok,
+  ];
+
+  // Select appropriate arrays based on isFasting
+  const videoPaths = isFasting ? fastingVideos : imsakVideos;
+  const usedVideosArray = isFasting ? usedFastingVideos : usedImsakVideos;
+  const categoryName = isFasting ? "fasting" : "imsak";
+
+  // Get available videos (not used today in this category)
+  const availableVideos = videoPaths.filter(
+    (video) => !usedVideosArray.includes(video)
+  );
+
+  // If all videos are used, reset and use all videos again
+  if (availableVideos.length === 0) {
+    if (isFasting) {
+      usedFastingVideos = [];
+    } else {
+      usedImsakVideos = [];
+    }
+    availableVideos.push(...videoPaths);
+    console.log(`All ${categoryName} videos used today, resetting...`);
+  }
+
+  // Randomly select from available videos
+  const randomIndex = Math.floor(Math.random() * availableVideos.length);
+  const selectedVideo = availableVideos[randomIndex];
+
+  // Mark this video as used in the appropriate category
+  if (isFasting) {
+    usedFastingVideos.push(selectedVideo);
+  } else {
+    usedImsakVideos.push(selectedVideo);
+  }
+
+  console.log(`Selected ${categoryName} video: ${selectedVideo}`);
+  console.log(
+    `Used ${categoryName} videos today: ${usedVideosArray.length + 1}/${
+      videoPaths.length
+    }`
+  );
+
+  return selectedVideo;
+}
+
 async function handleLaparMessage(message) {
   try {
     const imsakiyahData = await initializeImsakiyahData();
@@ -315,28 +413,8 @@ async function handleLaparMessage(message) {
     // console.log(`isWithinFastingHours: ${fastingHours}`);
     // console.log(`isWithinSahurHours: ${sahurHours}`);
     if (isWithinFastingHours(imsakiyahData)) {
-      // Array of video paths
-      const videoPaths = [
-        assets.images.lapar,
-        assets.images.puasaGaSih,
-        assets.videos.bukaJamBerapa,
-        assets.videos.esBuah,
-        assets.videos.esTeh,
-        assets.videos.bahlil,
-        assets.videos.ashadu,
-        assets.videos.sederhana,
-        assets.videos.ayam,
-        assets.videos.mancing1,
-        assets.videos.mancing2,
-        assets.videos.mancing3,
-        assets.videos.maju,
-        assets.videos.cobaDulu,
-        assets.videos.ojok,
-      ];
-
       // Randomly select one video
-      const randomizeMeme =
-        videoPaths[Math.floor(Math.random() * videoPaths.length)];
+      const randomizeMeme = getRandomUnusedVideo(true);
 
       // Existing maghrib countdown logic
       const jakartaMaghrib = imsakiyahData.imsakiyahJakartaNow?.maghrib;
@@ -387,27 +465,8 @@ async function handleLaparMessage(message) {
         });
       }
     } else if (isWithinSahurHours(imsakiyahData)) {
-      const videoPaths = [
-        assets.images.kerupuk,
-        assets.gifs.oguriMakan,
-        assets.images.himariMokel,
-        assets.videos.bukaGes,
-        assets.videos.waktunyaBuka,
-        assets.videos.wahyuDibadog,
-        assets.videos.kueNiga,
-        assets.videos.bis,
-        assets.videos.petasan,
-        assets.videos.ayam,
-        assets.videos.mancing1,
-        assets.videos.mancing2,
-        assets.videos.mancing3,
-        assets.videos.cobaDulu,
-        assets.videos.ojok,
-      ];
-
       // Randomly select one video
-      const randomizeMeme =
-        videoPaths[Math.floor(Math.random() * videoPaths.length)];
+      const randomizeMeme = getRandomUnusedVideo(false);
       // New imsak countdown logic
       const jakartaImsak = imsakiyahData.imsakiyahJakartaNow?.imsak;
       const majalengkaImsak = imsakiyahData.imsakiyahMajalengkaNow?.imsak;
