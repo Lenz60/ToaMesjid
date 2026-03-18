@@ -29,7 +29,7 @@ const videos = {
   cokA: path.join(__dirname, "assets", "videos", "coka.mp4"),
   ashadu: path.join(__dirname, "assets", "videos", "ashadu.mp4"),
   bahlil: path.join(__dirname, "assets", "videos", "bahlil.mp4"),
-  kueNiga: path.join(__dirname, "assets", "videos", "kueNiga.webm"),
+  kueNiga: path.join(__dirname, "assets", "videos", "kueniga.webm"),
   wahyuDibadog: path.join(__dirname, "assets", "videos", "maswahyu.webm"),
   waktunyaBuka: path.join(__dirname, "assets", "videos", "waktunyabuka.webm"),
   hariIniAkuMokel: path.join(
