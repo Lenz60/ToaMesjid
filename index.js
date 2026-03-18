@@ -510,12 +510,56 @@ async function handleLaparMessage(message) {
     logError(error, "handleLaparMessage");
     console.error("Error in handleLaparMessage:", error);
 
+    // Determine error type and create user-friendly message
+    let errorMessage = "Terjadi error, coba lagi nanti";
+
+    if (error.code === "ENOENT") {
+      // File not found error
+      const fileName = error.path
+        ? error.path.split("/").pop()
+        : "unknown file";
+      errorMessage = `Error: Takjil hilang - ${fileName}`;
+    } else if (
+      error.message &&
+      error.message.includes("Cannot read properties")
+    ) {
+      // Discord.js attachment error
+      errorMessage = "Error: Discord ngerusak Takjil";
+    } else if (error.message && error.message.includes("Missing Permissions")) {
+      // Permission error
+      errorMessage = "Error: Marbot ga dibolehin";
+    } else if (error.message && error.message.includes("timeout")) {
+      // API timeout
+      errorMessage = "Error: Marbot cari takjil ga balik-balik (Timeout)";
+    } else if (error.name === "AxiosError") {
+      // API request error
+      errorMessage = `Error: Marbot bawa kabur takjil (API Failure) (${
+        error.response?.status || "unknown"
+      })`;
+    } else {
+      // Generic error with partial message
+      const shortError = error.message
+        ? error.message.substring(0, 50)
+        : error.toString().substring(0, 50);
+      errorMessage = `Error: ${shortError}...`;
+    }
+
     try {
       await message.reply({
-        content: "Terjadi error, coba lagi nanti",
+        content: errorMessage,
       });
     } catch (replyError) {
       logError(replyError, "handleLaparMessage - reply error");
+
+      // Try to send to channel if reply fails
+      try {
+        const channel = client.channels.cache.get(ChannelID.TestChannelID);
+        await channel.send({
+          content: `${errorMessage} (reply gagal)`,
+        });
+      } catch (channelError) {
+        logError(channelError, "handleLaparMessage - channel send error");
+      }
     }
   }
 }
