@@ -22,6 +22,7 @@ const client = new Client({
 // Variables to store used video
 let usedFastingVideos = [];
 let usedImsakVideos = [];
+let usedLebaranVideos = [];
 let lastResetDate = null;
 
 // Add error logging function
@@ -42,7 +43,7 @@ client.login(process.env.TOKEN);
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
 client.on("ready", () => {
-  const channel = client.channels.cache.get(ChannelID.BotChannelID);
+  const channel = client.channels.cache.get(ChannelID.TestChannelID);
   console.log(`${client.user.username} ready!`);
   channel.send("Toa Mesjid Online 🔈🔉🔊");
 });
@@ -86,6 +87,8 @@ function extractImsakiyahData(apiResponse, currentRamadanDay) {
 }
 function getCurrentRamadanDay() {
   // Ramadan 2025 starts on February 19, 2026 (1st day of Ramadan)
+  // ? You set manually the start date of Ramadan here, since it changes every year, and we need it to calculate the current day of Ramadan
+  // ? It's differenciate between NU or Muhamadiyah, so decide which one you want to use, or you can update it every year when Ramadan starts
   const ramadanStartDate = moment.tz("2026-02-19", "Asia/Jakarta");
   const today = moment.tz("Asia/Jakarta");
 
@@ -96,9 +99,12 @@ function getCurrentRamadanDay() {
   const ramadanDay = daysDifference + 1;
 
   // Ensure it's within valid Ramadan range (1-30)
-  if (ramadanDay < 1 || ramadanDay > 30) {
+  if (ramadanDay < 1) {
     console.log(`Not in Ramadan period. Calculated day: ${ramadanDay}`);
     return null;
+  }
+  if (ramadanDay > 30) {
+    return false;
   }
 
   return ramadanDay;
@@ -106,11 +112,14 @@ function getCurrentRamadanDay() {
 
 async function initializeImsakiyahData() {
   const currentRamadanDay = getCurrentRamadanDay();
-
   // If not in Ramadan period, return empty data
-  if (!currentRamadanDay) {
+  if (currentRamadanDay === null) {
     console.log("Not currently in Ramadan period");
     return {};
+  }
+  if (currentRamadanDay === false) {
+    console.log("Lebaran Coy");
+    return { isLebaran: true };
   }
 
   const locations = [
@@ -302,8 +311,8 @@ function resetDailyVideosIfNeeded() {
 }
 
 // Function to get a random unused video based on fasting or imsak category
-function getRandomUnusedVideo(isFasting = false) {
-  // resetDailyVideosIfNeeded();
+function getRandomUnusedVideo(options = { type: "normal" }) {
+  resetDailyVideosIfNeeded();
 
   const fastingVideos = [
     assets.images.lapar,
@@ -341,10 +350,37 @@ function getRandomUnusedVideo(isFasting = false) {
     assets.videos.ojok,
   ];
 
-  // Select appropriate arrays based on isFasting
-  const videoPaths = isFasting ? fastingVideos : imsakVideos;
-  const usedVideosArray = isFasting ? usedFastingVideos : usedImsakVideos;
-  const categoryName = isFasting ? "fasting" : "imsak";
+  const lebaranVideos = [
+    assets.videos.lebaran1,
+    assets.videos.lebaran2,
+    assets.videos.lebaran3,
+    assets.images.lebaran,
+  ];
+
+  // Select appropriate arrays based on type
+  let videoPaths, usedVideosArray, categoryName;
+
+  switch (options.type) {
+    case "fasting":
+      videoPaths = fastingVideos;
+      usedVideosArray = usedFastingVideos;
+      categoryName = "fasting";
+      break;
+    case "imsak":
+      videoPaths = imsakVideos;
+      usedVideosArray = usedImsakVideos;
+      categoryName = "imsak";
+      break;
+    case "lebaran":
+      videoPaths = lebaranVideos;
+      usedVideosArray = usedLebaranVideos;
+      categoryName = "lebaran";
+      break;
+    default:
+      videoPaths = imsakVideos;
+      usedVideosArray = usedImsakVideos;
+      categoryName = "normal";
+  }
 
   // Get available videos (not used today in this category)
   const availableVideos = videoPaths.filter(
@@ -353,10 +389,16 @@ function getRandomUnusedVideo(isFasting = false) {
 
   // If all videos are used, reset and use all videos again
   if (availableVideos.length === 0) {
-    if (isFasting) {
-      usedFastingVideos = [];
-    } else {
-      usedImsakVideos = [];
+    switch (options.type) {
+      case "fasting":
+        usedFastingVideos = [];
+        break;
+      case "imsak":
+        usedImsakVideos = [];
+        break;
+      case "lebaran":
+        usedLebaranVideos = [];
+        break;
     }
     availableVideos.push(...videoPaths);
     console.log(`All ${categoryName} videos used today, resetting...`);
@@ -367,10 +409,16 @@ function getRandomUnusedVideo(isFasting = false) {
   const selectedVideo = availableVideos[randomIndex];
 
   // Mark this video as used in the appropriate category
-  if (isFasting) {
-    usedFastingVideos.push(selectedVideo);
-  } else {
-    usedImsakVideos.push(selectedVideo);
+  switch (options.type) {
+    case "fasting":
+      usedFastingVideos.push(selectedVideo);
+      break;
+    case "imsak":
+      usedImsakVideos.push(selectedVideo);
+      break;
+    case "lebaran":
+      usedLebaranVideos.push(selectedVideo);
+      break;
   }
 
   console.log(`Selected ${categoryName} video: ${selectedVideo}`);
@@ -387,6 +435,18 @@ async function handleLaparMessage(message) {
   try {
     const imsakiyahData = await initializeImsakiyahData();
 
+    const itsLebaran = imsakiyahData.isLebaran;
+
+    if (itsLebaran) {
+      const randomizeMeme = getRandomUnusedVideo({ type: "lebaran" });
+      await message.reply({
+        content:
+          "Udah lebaran coy, ga usah like people difficult, makan opor aja\nMinal Aidzin Wal Faidzin, mohon maaf lahir dan batin\nSelamat Hari Raya Idul Fitri 1447 H",
+        files: [randomizeMeme],
+      });
+      return;
+    }
+
     // Check if all API calls failed
     const allDataFailed =
       !imsakiyahData.imsakiyahMajalengkaNow &&
@@ -402,19 +462,9 @@ async function handleLaparMessage(message) {
       return;
     }
 
-    // Add debugging
-    // const fastingHours = isWithinFastingHours(imsakiyahData);
-    // const sahurHours = isWithinSahurHours(imsakiyahData);
-    // const currentTime = new Date().toLocaleString("id-ID", {
-    //   timeZone: "Asia/Jakarta",
-    // });
-
-    // console.log(`Current time: ${currentTime}`);
-    // console.log(`isWithinFastingHours: ${fastingHours}`);
-    // console.log(`isWithinSahurHours: ${sahurHours}`);
     if (isWithinFastingHours(imsakiyahData)) {
       // Randomly select one video
-      const randomizeMeme = getRandomUnusedVideo(true);
+      const randomizeMeme = getRandomUnusedVideo({ type: "fasting" });
 
       // Existing maghrib countdown logic
       const jakartaMaghrib = imsakiyahData.imsakiyahJakartaNow?.maghrib;
@@ -466,7 +516,7 @@ async function handleLaparMessage(message) {
       }
     } else if (isWithinSahurHours(imsakiyahData)) {
       // Randomly select one video
-      const randomizeMeme = getRandomUnusedVideo(false);
+      const randomizeMeme = getRandomUnusedVideo({ type: "imsak" });
       // New imsak countdown logic
       const jakartaImsak = imsakiyahData.imsakiyahJakartaNow?.imsak;
       const majalengkaImsak = imsakiyahData.imsakiyahMajalengkaNow?.imsak;
@@ -565,13 +615,28 @@ async function handleLaparMessage(message) {
 }
 
 client.on("messageCreate", async (message) => {
-  // const channel = client.channels.cache.get(ChannelID.GeneralID);
+  // const channel = client.channels.cache.get(ChannelID.TestChannelID);
   if (message.author.bot) return;
   const content = message.content;
 
   const lapar = /(^| |\"|\')lapar nich( |$|\.|\,|!|\?|\:|\;|\"|\')/i;
   if (lapar.test(content) || content.includes("796773828059201616")) {
     await handleLaparMessage(message);
+    // return;
+  }
+});
+client.on("messageCreate", async (message) => {
+  // const channel = client.channels.cache.get(ChannelID.TestChannelID);
+  if (message.author.bot) return;
+  const content = message.content;
+
+  const lapar = /(^| |\"|\')lebaran nich( |$|\.|\,|!|\?|\:|\;|\"|\')/i;
+  if (lapar.test(content) || content.includes("796773828059201616")) {
+    const randomizeMeme = getRandomUnusedVideo({ type: "lebaran" });
+    await message.reply({
+      content: "Habede Lebaran 1447 H semoga mohon maaf lahir batin",
+      files: [randomizeMeme],
+    });
     // return;
   }
 });
@@ -599,7 +664,7 @@ function sahurAlert() {
     async () => {
       try {
         // const channel = client.channels.cache.get(ChannelID.BotChannelID);
-        const channel = client.channels.cache.get(ChannelID.GeneralID);
+        const channel = client.channels.cache.get(ChannelID.TestChannelID);
 
         if (!channel) {
           console.error("Channel not found");
@@ -637,7 +702,72 @@ function sahurAlert() {
     }
   );
 }
-sahurAlert();
+function eidAlert() {
+  // Schedule for 6:00 AM Jakarta time (UTC+7) every day
+  cron.schedule(
+    "0 6 * * *",
+    async () => {
+      try {
+        // const channel = client.channels.cache.get(ChannelID.BotChannelID);
+        const channel = client.channels.cache.get(ChannelID.TestChannelID);
+
+        if (!channel) {
+          console.error("Channel not found");
+          return;
+        }
+
+        const attachment = new AttachmentBuilder(assets.videos.lebaran3, {
+          name: path.basename(assets.videos.lebaran3),
+        });
+
+        await channel.send({
+          content:
+            "Selamat Pagiii, Selamat Hari Raya Idul Fitri 1447 H ヾ(≧▽≦*)o\n\nMinal Aidzin Wal Faidzin, mohon maaf lahir dan batin 🙏🙏\n\nJangan lupa sholat i'dul fitri berjamaah di mesjid coy\nbuat yang NU NU ajah\nyang Muhamadiyah kan dah kemaren\n\nJangan lupa mukbang kue kering nya sampe wareg🫃🫃",
+          files: [attachment],
+        });
+
+        console.log(`Sahur alert sent successfully with ${attachment}`);
+      } catch (error) {
+        console.error("Error sending sahur alert:", error);
+      }
+    },
+    {
+      scheduled: true,
+      timezone: "Asia/Jakarta",
+    }
+  );
+}
+
+// ? /////////////////////////////////////////////////////////
+// ? Function for checking wether now is ramadhan or not,
+// ? uncomment if you want to use this, it will do cron schedule at 00:00 every day to check if its ramadhan or lebaran, and send alert accordingly
+// cron.schedule(
+//   "0 0 * * *",
+//   async () => {
+//     console.log("Checking Ramadan status...");
+//     await cronChecker();
+//   },
+//   {
+//     scheduled: true,
+//     timezone: "Asia/Jakarta",
+//   }
+// );
+// async function cronChecker() {
+//   const checkRamadhan = await initializeImsakiyahData();
+//   const itsLebaran = checkRamadhan.isLebaran;
+//   if (itsLebaran) {
+//     eidAlert();
+//   } else {
+//     sahurAlert();
+//   }
+// }
+// cronChecker();
+// ? //////////////////////////////////////////////////////////
+// ? Or manually call the function to check if its ramadhan or lebaran and send alert accordingly,
+// ? you can comment out one of them if you only want to use one of the alert
+// v Turned off sahur alert for now, since its not Ramadan yet,
+// sahurAlert();
+eidAlert();
 
 process.stdin.resume();
 //Close Message When the bot is turned off or killed the process
@@ -650,37 +780,37 @@ const timeoutclose = setTimeout(function () {
 //   return new Promise((resolve) => setTimeout(resolve, time));
 // }
 // process.on("SIGHUP", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGINT", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 //   sleep(3000).then(() => {
 //     process.exit(0);
 //   });
 // });
 // process.on("SIGTERM", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGKILL", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR1", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("SIGUSR2", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("exit", function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
 // process.on("uncaughtException", async function () {
-//   const channel = client.channels.cache.get(ChannelID.GeneralID);
+//   const channel = client.channels.cache.get(ChannelID.TestChannelID);
 //   message.reply("Pengharum Ruangan Offline");
 // });
