@@ -4,6 +4,7 @@ const images = {
   lapar: path.join(__dirname, "assets", "images", "lapar.jpg"),
   puasaGaSih: path.join(__dirname, "assets", "images", "lupuasagasi.png"),
   himariMokel: path.join(__dirname, "assets", "images", "himari.png"),
+  lebaran: path.join(__dirname, "assets", "images", "lebaran.jpg"),
 };
 
 const videos = {
@@ -42,6 +43,9 @@ const videos = {
   sahur1: path.join(__dirname, "assets", "videos", "sahur.mp4"),
   sahur2: path.join(__dirname, "assets", "videos", "sahur2.mp4"),
   ayam: path.join(__dirname, "assets", "videos", "ayam.mp4"),
+  lebaran1: path.join(__dirname, "assets", "videos", "lebaran1.mp4"),
+  lebaran2: path.join(__dirname, "assets", "videos", "lebaran2.mp4"),
+  lebaran3: path.join(__dirname, "assets", "videos", "lebaran3.mp4"),
 };
 
 const gifs = {
